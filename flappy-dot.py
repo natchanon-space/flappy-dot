@@ -8,6 +8,8 @@ CANVAS_HEIGHT = 500
 UPDATE_DELAY = 33
 PILLAR_SPEED = 5
 
+GRAVITY = 1
+
 class PillarPair():
     def __init__(self, game_app, speed, expand_x=0, color="green"):
         self.canvas = game_app.canvas
@@ -36,7 +38,7 @@ class PillarPair():
 
     def set_pillars_info(self):
         rand_point = random.randint(100, self.canvas_height-100)
-        space = 100
+        space = 150
         self.width = self.canvas_width / 10
 
         self.upper_height = rand_point - space/2
@@ -53,13 +55,39 @@ class PillarPair():
     def get_hitbox(self):
         return self.upper_pillar.get_hitbox(), self.lower_pillar.get_hitbox()
 
+class Dot(Contour):
+    def __init__(self, game_app, size, color="green", x=0, y=0, size_x=20, size_y=20, gravity=GRAVITY):
+        super().__init__(game_app, "c", color=color, x=x, y=y, size_x=size_x, size_y=size_y)
+        self.gravity = gravity
+        
+    def init_element(self):
+        self.vy = 0
+
+    def update(self):
+        self.y += self.vy
+        self.vy += self.gravity
+
+    def increase_speed(self):
+        pass
+
+
 class FlappyDot(GameApp):
     def init_game(self):
         self.create_pillars()
 
+        self.dot = Dot(self, "c", color="green", x=50, y=self.canvas_height/2, size_x=20, size_y=20)
+        self.elements.append(self.dot)
+
+        self.text = Text(self, text="Score: XX", x=50, y=20)
+        self.elements.append(self.text)
+
     def create_pillars(self):
         for i in range(5):
             self.elements.append(PillarPair(self, PILLAR_SPEED, expand_x=i*190))
+
+    def on_key_pressed(self, event):
+        if event.char == " ":
+            self.dot.vy -= 12
 
 if __name__ == "__main__":
     root = tk.Tk()
