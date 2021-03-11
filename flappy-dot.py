@@ -27,5 +27,6 @@ if __name__ == "__main__":
 
     print(app.circle.get_hitbox())
     print(app.rectangle.get_hitbox())
+    print(app.test_text.text)
 
     root.mainloop()
