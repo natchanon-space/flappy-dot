@@ -89,4 +89,37 @@ class Text(GameElement):
         self.text = text
         self.canvas.itemconfigure(self.object_id, text=self.text)
 
-# def Contour(self):
+class Contour(GameElement):
+    def __init__(self, game_app, shape, color="blue", x=0, y=0, size_x=5, size_y=5):
+        self.shape = shape
+        self.size_x = size_x
+        self.size_y = size_y
+        self.color = color
+        super().__init__(game_app, x, y)
+
+    def init_canvas_object(self):
+        if self.shape == "c" or self.shape == "circle":
+            self.object_id = self.canvas.create_oval(self.x-self.size_x/2, 
+                                                     self.y-self.size_y/2,
+                                                     self.x+self.size_x/2,
+                                                     self.y+self.size_y/2,
+                                                     fill=self.color)
+                                                     
+        elif self.shape == "r" or self.shape == "rectangle":
+            self.object_id = self.canvas.create_rectangle(self.x-self.size_x/2, 
+                                                          self.y-self.size_y/2,
+                                                          self.x+self.size_x/2,
+                                                          self.y+self.size_y/2,
+                                                          fill=self.color)
+
+        else:
+            raise TypeError(f"{self.shape} is not included")
+
+    def set_size(self, size_x, size_y):
+        self.size_x = size_x
+        self.size_y = size_y
+        self.canvas.coords(self.object_id,
+                           self.x-self.size_x/2, 
+                           self.y-self.size_y/2,
+                           self.x+self.size_x/2,
+                           self.y+self.size_y/2)
