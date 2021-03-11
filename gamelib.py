@@ -77,7 +77,7 @@ class GameElement():
         """ init element properties """
         pass
 
-def Text(self):
+class Text(GameElement):
     def __init__(self, game_app, text, x=0, y=0):
         self.text = text
         super().__init__(game_app, x, y)
@@ -88,3 +88,5 @@ def Text(self):
     def set_text(self, text):
         self.text = text
         self.canvas.itemconfigure(self.object_id, text=self.text)
+
+# def Contour(self):
