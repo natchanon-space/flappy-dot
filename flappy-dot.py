@@ -6,88 +6,120 @@ CANVAS_WIDTH = 800
 CANVAS_HEIGHT = 500
 
 UPDATE_DELAY = 33
+GRAVITY = 2.5
+
 PILLAR_SPEED = 5
+STARTING_VELOCITY = -30
+JUMP_VELOCITY = -20
 
-GRAVITY = 1
-
-class PillarPair():
-    def __init__(self, game_app, speed, expand_x=0, color="green"):
-        self.canvas = game_app.canvas
-        self.canvas_height = game_app.canvas_height
-        self.canvas_width = game_app.canvas_width
-        self.color = color
-        self.speed = speed
-        self.expand_x = expand_x
-
-        self.create_pillars()
-        
-    def update(self):
-        self.upper_pillar.x -= self.speed
-        self.lower_pillar.x -= self.speed
-        if self.upper_pillar.x + self.upper_pillar.size_x < 0:
-            self.reset()
-
-    def render(self):
-        self.upper_pillar.render()
-        self.lower_pillar.render()
-
-    def create_pillars(self):
-        self.set_pillars_info()
-        self.upper_pillar = Contour(self, "r", color="blue", x=self.canvas_width+self.width+self.expand_x, y=self.upper_y, size_x=self.width, size_y=self.upper_height)
-        self.lower_pillar = Contour(self, "r", color="red", x=self.canvas_width+self.width+self.expand_x, y=self.lower_y, size_x=self.width, size_y=self.lower_height)
-
-    def set_pillars_info(self):
-        rand_point = random.randint(100, self.canvas_height-100)
-        space = 150
-        self.width = self.canvas_width / 10
-
-        self.upper_height = rand_point - space/2
-        self.upper_y = self.upper_height/2
-
-        self.lower_height = self.canvas_height - rand_point - space/2
-        self.lower_y = self.canvas_height - self.lower_height/2
-
-    def reset(self):
-        self.set_pillars_info()
-        self.upper_pillar.set_shape(self.canvas_width+self.width, self.upper_y, self.width, self.upper_height)
-        self.lower_pillar.set_shape(self.canvas_width+self.width, self.lower_y, self.width, self.lower_height)
-
-    def get_hitbox(self):
-        return self.upper_pillar.get_hitbox(), self.lower_pillar.get_hitbox()
 
 class Dot(Contour):
-    def __init__(self, game_app, size, color="green", x=0, y=0, size_x=20, size_y=20, gravity=GRAVITY):
-        super().__init__(game_app, "c", color=color, x=x, y=y, size_x=size_x, size_y=size_y)
-        self.gravity = gravity
-        
     def init_element(self):
-        self.vy = 0
+        self.vy = STARTING_VELOCITY
+        self.is_started = False
+        #create hitbox for dot
+        self.hitbox = (-200, 0, -200, 0)
+    
+    def update(self):
+        if self.is_started:
+            self.y += self.vy
+            self.vy += GRAVITY
+            #update hitbox
+            self.hitbox = (self.x-20, self.y-20, self.x+20, self.y+20)
+
+    
+    def start(self):
+        self.is_started = True
+
+    def jump(self):
+        self.vy = JUMP_VELOCITY
+
+    def reset(self):
+        self.is_started = False
+
+    def get_coords(self):
+        return (self.x, self.y)
+
+
+class PillarPair(Contour):
+    def init_element(self):
+        self.x = 800
+        self.y = 250
+        self.is_started = False
+        #create hitbox for each pillar
+        self.hitbox_upper = (200, 0, 200, 0)
+        self.hitbox_lower = (200, 0, 200, 0)
+        
 
     def update(self):
-        self.y += self.vy
-        self.vy += self.gravity
+        if self.is_started:
+            #reset pillar location
+            if self.x <= -50:
+                self.x = 850
+                #random hole(y) loaction
+                self.y = random.choice([120, 200, 300, 380])
+            else:
+                self.x -= 10 
+            #update hitbox
+            self.hitbox_upper = (self.x-40, self.y-500, self.x+40, self.y-100)
+            self.hitbox_lower = (self.x-40, self.y+98, self.x+40, self.y+500)
+        
 
-    def increase_speed(self):
-        pass
+    def start(self):
+        self.is_started = True
+
+    def reset(self):
+        self.is_started = False
+
+    def get_coords(self):
+        return (self.x, self.y)
 
 
 class FlappyDot(GameApp):
-    def init_game(self):
-        self.create_pillars()
+    def create_sprites(self):
+        #create dot
+        self.dot = Dot(self, 'images/dot.png', CANVAS_WIDTH // 6, CANVAS_HEIGHT // 2)
 
-        self.dot = Dot(self, "c", color="green", x=50, y=self.canvas_height/2, size_x=20, size_y=20)
         self.elements.append(self.dot)
+        
+        #creat a pair of pillar
+        self.pillar_pair = PillarPair(self, 'images/pillar-pair.png', CANVAS_WIDTH, CANVAS_HEIGHT // 2)
+        
+        self.elements.append(self.pillar_pair)
 
-        self.text = Text(self, text="Score: XX", x=50, y=20)
+    def init_game(self):
+        self.create_sprites()
+        self.score = 0
+        self.text = Text(self, text=f"Score: {self.score}", x=50, y=20)
         self.elements.append(self.text)
 
-    def create_pillars(self):
-        for i in range(5):
-            self.elements.append(PillarPair(self, PILLAR_SPEED, expand_x=i*190))
-
     def on_key_pressed(self, event):
-        if event.char == " ":
-            self.dot.vy -= 12
+        if event.char == ' ':
+            if not self.dot.is_started:
+                self.dot.start()
+                self.pillar_pair.start()
+            else:
+                self.dot.jump()
+        #update score
+        self.score_display()
+        #hitbox check
+        self.hit_check()
+    
+
+    def score_display(self):
+        if self.dot.hitbox[0] == self.pillar_pair.hitbox_upper[2]:
+            self.score += 1
+            self.text = Text(self, text=f"Score: {self.score}", x=50, y=20)
+            self.elements.append(self.text)
+
+    
+    def hit_check(self):
+        if self.dot.hitbox[1] < self.pillar_pair.hitbox_upper[3] or self.dot.hitbox[3] > self.pillar_pair.hitbox_lower[1]:
+            if (self.dot.hitbox[2] > self.pillar_pair.hitbox_upper[0] and self.dot.hitbox[2] < self.pillar_pair.hitbox_upper[2]) or \
+                (self.dot.hitbox[0] > self.pillar_pair.hitbox_upper[0] and self.dot.hitbox[0] < self.pillar_pair.hitbox_upper[2]):
+                #Game Over
+                exit() 
+               
 
 if __name__ == "__main__":
     root = tk.Tk()
@@ -95,9 +127,5 @@ if __name__ == "__main__":
 
     app = FlappyDot(root, CANVAS_WIDTH, CANVAS_HEIGHT)
     app.start()
-
-    # print(app.circle.get_hitbox())
-    # print(app.rectangle.get_hitbox())
-    # print(app.test_text.text)
 
     root.mainloop()
