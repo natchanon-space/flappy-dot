@@ -123,3 +123,6 @@ class Contour(GameElement):
                            self.y-self.size_y/2,
                            self.x+self.size_x/2,
                            self.y+self.size_y/2)
+
+    def get_hitbox(self):
+        return (self.x-self.size_x/2, self.y-self.size_y/2, self.x+self.size_x/2, self.size_y+self.size_y/2)
