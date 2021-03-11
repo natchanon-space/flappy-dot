@@ -8,38 +8,65 @@ CANVAS_HEIGHT = 500
 UPDATE_DELAY = 33
 PILLAR_SPEED = 5
 
+class PillarPair():
+    def __init__(self, game_app, speed, expand_x=0, color="green"):
+        self.canvas = game_app.canvas
+        self.canvas_height = game_app.canvas_height
+        self.canvas_width = game_app.canvas_width
+        self.color = color
+        self.speed = speed
+        self.expand_x = expand_x
+
+        self.create_pillars()
+        
+    def update(self):
+        self.upper_pillar.x -= self.speed
+        self.lower_pillar.x -= self.speed
+        if self.upper_pillar.x + self.upper_pillar.size_x < 0:
+            self.reset()
+
+    def render(self):
+        self.upper_pillar.render()
+        self.lower_pillar.render()
+
+    def create_pillars(self):
+        self.set_pillars_info()
+        self.upper_pillar = Contour(self, "r", color="blue", x=self.canvas_width+self.width+self.expand_x, y=self.upper_y, size_x=self.width, size_y=self.upper_height)
+        self.lower_pillar = Contour(self, "r", color="red", x=self.canvas_width+self.width+self.expand_x, y=self.lower_y, size_x=self.width, size_y=self.lower_height)
+
+    def set_pillars_info(self):
+        rand_point = random.randint(100, self.canvas_height-100)
+        space = 100
+        self.width = self.canvas_width / 10
+
+        self.upper_height = rand_point - space/2
+        self.upper_y = self.upper_height/2
+
+        self.lower_height = self.canvas_height - rand_point - space/2
+        self.lower_y = self.canvas_height - self.lower_height/2
+
+    def reset(self):
+        self.set_pillars_info()
+        self.upper_pillar.set_shape(self.canvas_width+self.width, self.upper_y, self.width, self.upper_height)
+        self.lower_pillar.set_shape(self.canvas_width+self.width, self.lower_y, self.width, self.lower_height)
+
+    def get_hitbox(self):
+        return self.upper_pillar.get_hitbox(), self.lower_pillar.get_hitbox()
+
 class FlappyDot(GameApp):
     def init_game(self):
-        # self.test_text = Text(self, "text", 200, 200)
-        # self.elements.append(self.test_text)
-
-        # self.circle = Contour(self, "c", x=100, y=100, size_x=100, size_y=100)
-        # self.elements.append(self.circle)
-
-        # self.rectangle = Contour(self, "r", x=400, y=400, size_x=100, size_y=100, color="red")
-        # self.elements.append(self.rectangle)
-
         self.create_pillars()
 
     def create_pillars(self):
-        rand_point = random.randint(50, self.canvas_height-50)
-        space = 120
-        width = self.canvas_width / 10
-
-        upper_height = rand_point - space/2
-        upper_y = upper_height/2
-
-        lower_height = self.canvas_height - rand_point - space/2
-        lower_y = self.canvas_height - lower_height/2
-
-        self.upper_pillar = Contour(self, "r", color="blue", x=200, y=upper_y, size_x=width, size_y=upper_height)
-        self.lower_pillar = Contour(self, "r", color="red", x=200, y=lower_y, size_x=width, size_y=lower_height)
+        for i in range(5):
+            self.elements.append(PillarPair(self, PILLAR_SPEED, expand_x=i*190))
 
 if __name__ == "__main__":
     root = tk.Tk()
     root.resizable(0, 0)
 
     app = FlappyDot(root, CANVAS_WIDTH, CANVAS_HEIGHT)
+    app.start()
 
     # print(app.circle.get_hitbox())
     # print(app.rectangle.get_hitbox())

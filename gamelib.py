@@ -115,14 +115,18 @@ class Contour(GameElement):
         else:
             raise TypeError(f"{self.shape} is not included")
 
-    def set_size(self, size_x, size_y):
-        self.size_x = size_x
-        self.size_y = size_y
+    def render(self):
         self.canvas.coords(self.object_id,
                            self.x-self.size_x/2, 
                            self.y-self.size_y/2,
                            self.x+self.size_x/2,
                            self.y+self.size_y/2)
 
+    def set_shape(self, x, y, size_x, size_y):
+        self.x = x
+        self.y = y
+        self.size_x = size_x
+        self.size_y = size_y
+
     def get_hitbox(self):
-        return (self.x-self.size_x/2, self.y-self.size_y/2, self.x+self.size_x/2, self.size_y+self.size_y/2)
+        return (self.x-self.size_x/2, self.y-self.size_y/2, self.x+self.size_x/2, self.size_y+self.size_y)
