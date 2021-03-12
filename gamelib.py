@@ -95,9 +95,10 @@ class Contour(GameElement):
         self.image_filename = image_filename
         super().__init__(game_app, x, y)
 
-    def render(self):
+    # replace previous render for smoother motions
+    def init_canvas_object(self):
         self.photo_image = tk.PhotoImage(file=self.image_filename)
-        self.canvas_object_id = self.canvas.create_image(
+        self.object_id = self.canvas.create_image(
             self.x, 
             self.y,
             image=self.photo_image)

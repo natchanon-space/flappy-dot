@@ -6,12 +6,11 @@ CANVAS_WIDTH = 800
 CANVAS_HEIGHT = 500
 
 UPDATE_DELAY = 33
-GRAVITY = 2.5
+GRAVITY = 2 
 
 PILLAR_SPEED = 5
-STARTING_VELOCITY = -30
-JUMP_VELOCITY = -20
-
+STARTING_VELOCITY = 0
+JUMP_VELOCITY = 30
 
 class Dot(Contour):
     def init_element(self):
@@ -32,7 +31,7 @@ class Dot(Contour):
         self.is_started = True
 
     def jump(self):
-        self.vy = JUMP_VELOCITY
+        self.vy -= JUMP_VELOCITY
 
     def reset(self):
         self.is_started = False
@@ -74,20 +73,18 @@ class PillarPair(Contour):
     def get_coords(self):
         return (self.x, self.y)
 
-
 class FlappyDot(GameApp):
     def create_sprites(self):
         #create dot
         self.dot = Dot(self, 'images/dot.png', CANVAS_WIDTH // 6, CANVAS_HEIGHT // 2)
-
         self.elements.append(self.dot)
         
         #creat a pair of pillar
         self.pillar_pair = PillarPair(self, 'images/pillar-pair.png', CANVAS_WIDTH, CANVAS_HEIGHT // 2)
-        
         self.elements.append(self.pillar_pair)
 
     def init_game(self):
+        self.canvas.config(background="lightgreen")
         self.create_sprites()
         self.score = 0
         self.text = Text(self, text=f"Score: {self.score}", x=50, y=20)
@@ -123,6 +120,7 @@ class FlappyDot(GameApp):
 
 if __name__ == "__main__":
     root = tk.Tk()
+    root.title("Avocado Flight")
     root.resizable(0, 0)
 
     app = FlappyDot(root, CANVAS_WIDTH, CANVAS_HEIGHT)
