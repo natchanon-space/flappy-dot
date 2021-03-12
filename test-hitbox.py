@@ -3,15 +3,18 @@ from gamelib import GameApp, Contour
 
 class Tester(GameApp):
     def init_game(self):
-        self.dot = Contour(self, "images/dot.png", x=100, y=100)
-        print("x:", self.dot.x, "y:", self.dot.y)
-
+        self.dot = Contour(self, "images/dot.png", x=100, y=250, show_hitbox=True)
+        print("=== dot.png ===")
         print("img_width:", self.dot.photo_image.width(), "img_height:", self.dot.photo_image.height())
-        hb = self.dot.get_hitbox()
+        print("hitbix", self.dot.hitbox.get_hitbox())
 
-        print("hitbix", hb)
-        
-        self.canvas.create_rectangle(hb[0], hb[1], hb[2], hb[3])
+        self.upper_pillar = Contour(self, "images/pillar-top.png", x=200, y=100, show_hitbox=True)
+        print("=== pillar-top.png ===")
+        print("img_width:", self.upper_pillar.photo_image.width(), "img_height:", self.upper_pillar.photo_image.height())
+
+        self.lower_pillar = Contour(self, "images/pillar-bottom.png", x=300, y=400, show_hitbox=True)
+        print("=== pillar-top.png ===")
+        print("img_width:", self.lower_pillar.photo_image.width(), "img_height:", self.lower_pillar.photo_image.height())
 
 root = tk.Tk()
 root.resizable(0, 0)
