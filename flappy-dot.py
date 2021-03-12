@@ -1,6 +1,7 @@
 import tkinter as tk
 import random
 from gamelib import *
+from tkinter import messagebox
 
 CANVAS_WIDTH = 800
 CANVAS_HEIGHT = 500
@@ -11,6 +12,7 @@ GRAVITY = 2
 PILLAR_SPEED = 5
 STARTING_VELOCITY = -20
 JUMP_VELOCITY = 30
+
 
 class Dot(Sprite):
     def init_element(self):
@@ -37,7 +39,7 @@ class Dot(Sprite):
         return (self.x, self.y)
 
 
-class PillarPair():
+class PillarPair:
     def __init__(self, game_app, space=150, show_hitbox=False, extend_x=0):
         self.is_started = False
         self.space = space
@@ -105,7 +107,31 @@ class FlappyDot(GameApp):
                 self.dot.start()
                 self.pillars.start()
             else:
-                self.dot.jump()         
+                self.dot.jump()
+
+    """def toggle_animate(self):
+            self.is_animating = not self.is_animating
+            if self.is_animating:
+                self.
+                self.animate()
+            else:
+                self."""
+
+    def collision(self):
+        if self.dot.get_coords()[1] < - 300:
+            messagebox.showinfo(title="Flappy Birds", message="You lose! Score: XXX")
+            root.destroy()
+        elif self.dot.get_coords()[1] > CANVAS_HEIGHT + 50:
+            messagebox.showinfo(title="Flappy Birds", message="You lose! Score: XXX")
+            root.destroy()
+
+    def animate(self):
+        for elem in self.elements:
+            elem.update()
+            elem.render()
+            self.collision()
+        self.after_id = self.after(self.update_delay, self.animate)
+
 
 if __name__ == "__main__":
     root = tk.Tk()
