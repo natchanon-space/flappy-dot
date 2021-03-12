@@ -61,7 +61,7 @@ class GameElement():
 
     def hide(self):
         self.is_visible = False
-        self.canvas.itemconfigure(self.object_id, state="hiden")
+        self.canvas.itemconfigure(self.object_id, state="hidden")
 
     def update(self):
         pass
@@ -91,10 +91,16 @@ class Text(GameElement):
         self.canvas.itemconfigure(self.object_id, text=self.text)
 
 class Contour(GameElement):
-    def __init__(self, game_app, image_filename, x=0, y=0):
+    def __init__(self, game_app, image_filename, x=0, y=0, show_hitbox=False):
         self.image_filename = image_filename
-        self.show_hitbox = False
+        self.show_hitbox = show_hitbox
         super().__init__(game_app, x, y)
+        # show/hide hitbox
+        self.hitbox = hitbox(game_app, x, y, self.width, self.height)
+        if self.show_hitbox:
+            self.hitbox.show()
+        else:
+            self.hitbox.hide()
 
     # replace previous render for smoother motions
     def init_canvas_object(self):
@@ -106,5 +112,26 @@ class Contour(GameElement):
             self.y,
             image=self.photo_image)
 
+    def hitbox_update(self):
+        self.hitbox.x = self.x
+        self.hitbox.y = self.y
+
+    def render(self):
+        super().render()
+        self.hitbox.render()
+
+class hitbox(GameElement):
+    def __init__(self, game_app, x, y, width, height):
+        self.width = width
+        self.height = height
+        super().__init__(game_app, x, y)
+
+    def init_canvas_object(self):
+        self.object_id = self.canvas.create_rectangle(self.x-self.width/2, self.y-self.height/2, self.x+self.width/2, self.y+self.height/2)
+
     def get_hitbox(self):
         return self.x-self.width/2, self.y-self.height/2, self.x+self.width/2, self.y+self.height/2
+
+    def render(self):
+        if self.is_visible:
+            self.canvas.coords(self.object_id, self.x-self.width/2, self.y-self.height/2, self.x+self.width/2, self.y+self.height/2)

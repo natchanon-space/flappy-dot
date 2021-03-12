@@ -17,15 +17,13 @@ class Dot(Contour):
         self.vy = STARTING_VELOCITY
         self.is_started = False
         #create hitbox for dot
-        self.hitbox = (-200, 0, -200, 0)
     
     def update(self):
         if self.is_started:
             self.y += self.vy
             self.vy += GRAVITY
             #update hitbox
-            self.hitbox = (self.x-20, self.y-20, self.x+20, self.y+20)
-
+            self.hitbox_update()
     
     def start(self):
         self.is_started = True
@@ -44,11 +42,7 @@ class PillarPair(Contour):
     def init_element(self):
         self.x = 800
         self.y = 250
-        self.is_started = False
-        #create hitbox for each pillar
-        self.hitbox_upper = (200, 0, 200, 0)
-        self.hitbox_lower = (200, 0, 200, 0)
-        
+        self.is_started = False        
 
     def update(self):
         if self.is_started:
@@ -59,10 +53,6 @@ class PillarPair(Contour):
                 self.y = random.choice([120, 200, 300, 380])
             else:
                 self.x -= 10 
-            #update hitbox
-            self.hitbox_upper = (self.x-40, self.y-500, self.x+40, self.y-100)
-            self.hitbox_lower = (self.x-40, self.y+98, self.x+40, self.y+500)
-        
 
     def start(self):
         self.is_started = True
@@ -76,11 +66,11 @@ class PillarPair(Contour):
 class FlappyDot(GameApp):
     def create_sprites(self):
         #create dot
-        self.dot = Dot(self, 'images/dot.png', CANVAS_WIDTH // 6, CANVAS_HEIGHT // 2)
+        self.dot = Dot(self, 'images/dot.png', CANVAS_WIDTH//6, CANVAS_HEIGHT//2, show_hitbox=True)
         self.elements.append(self.dot)
         
         #creat a pair of pillar
-        self.pillar_pair = PillarPair(self, 'images/pillar-pair.png', CANVAS_WIDTH, CANVAS_HEIGHT // 2)
+        self.pillar_pair = PillarPair(self, 'images/pillar-pair.png', CANVAS_WIDTH, CANVAS_HEIGHT//2, show_hitbox=True)
         self.elements.append(self.pillar_pair)
 
     def init_game(self):
@@ -96,27 +86,7 @@ class FlappyDot(GameApp):
                 self.dot.start()
                 self.pillar_pair.start()
             else:
-                self.dot.jump()
-        #update score
-        self.score_display()
-        #hitbox check
-        self.hit_check()
-    
-
-    def score_display(self):
-        if self.dot.hitbox[0] == self.pillar_pair.hitbox_upper[2]:
-            self.score += 1
-            self.text = Text(self, text=f"Score: {self.score}", x=50, y=20)
-            self.elements.append(self.text)
-
-    
-    def hit_check(self):
-        if self.dot.hitbox[1] < self.pillar_pair.hitbox_upper[3] or self.dot.hitbox[3] > self.pillar_pair.hitbox_lower[1]:
-            if (self.dot.hitbox[2] > self.pillar_pair.hitbox_upper[0] and self.dot.hitbox[2] < self.pillar_pair.hitbox_upper[2]) or \
-                (self.dot.hitbox[0] > self.pillar_pair.hitbox_upper[0] and self.dot.hitbox[0] < self.pillar_pair.hitbox_upper[2]):
-                #Game Over
-                exit() 
-               
+                self.dot.jump()         
 
 if __name__ == "__main__":
     root = tk.Tk()
