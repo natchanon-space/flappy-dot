@@ -93,12 +93,18 @@ class Text(GameElement):
 class Contour(GameElement):
     def __init__(self, game_app, image_filename, x=0, y=0):
         self.image_filename = image_filename
+        self.show_hitbox = False
         super().__init__(game_app, x, y)
 
     # replace previous render for smoother motions
     def init_canvas_object(self):
         self.photo_image = tk.PhotoImage(file=self.image_filename)
+        self.width = self.photo_image.width()
+        self.height = self.photo_image.height()
         self.object_id = self.canvas.create_image(
             self.x, 
             self.y,
             image=self.photo_image)
+
+    def get_hitbox(self):
+        return self.x-self.width/2, self.y-self.height/2, self.x+self.width/2, self.y+self.height/2
