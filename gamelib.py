@@ -90,7 +90,7 @@ class Text(GameElement):
         self.text = text
         self.canvas.itemconfigure(self.object_id, text=self.text)
 
-class Contour(GameElement):
+class Sprite(GameElement):
     def __init__(self, game_app, image_filename, x=0, y=0, show_hitbox=False):
         self.image_filename = image_filename
         self.show_hitbox = show_hitbox
