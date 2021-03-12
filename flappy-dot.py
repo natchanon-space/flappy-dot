@@ -16,7 +16,6 @@ class Dot(Contour):
     def init_element(self):
         self.vy = STARTING_VELOCITY
         self.is_started = False
-        #create hitbox for dot
     
     def update(self):
         if self.is_started:
@@ -46,8 +45,8 @@ class PillarPair():
         self.show_hitbox = show_hitbox
 
         # create pillars
-        self.upper_pillar = Contour(game_app, "images/pillar-top.png", x=0, y=0, show_hitbox=show_hitbox)
-        self.lower_pillar = Contour(game_app, "images/pillar-bottom.png", x=0, y=0, show_hitbox=show_hitbox)
+        self.upper_pillar = Contour(game_app, "images/pillar-top.png", x=-500, y=0, show_hitbox=show_hitbox)
+        self.lower_pillar = Contour(game_app, "images/pillar-bottom.png", x=-500, y=0, show_hitbox=show_hitbox)
         self.reset_pillars()
 
     def reset_pillars(self):
