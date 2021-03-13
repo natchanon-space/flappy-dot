@@ -12,7 +12,6 @@ GRAVITY = 2
 PILLAR_SPEED = 5
 STARTING_VELOCITY = -20
 JUMP_VELOCITY = 30
-Score = 0
 
 class Dot(Sprite):
     def init_element(self):
@@ -103,7 +102,8 @@ class FlappyDot(GameApp):
     def init_game(self):
         self.canvas.config(background="lightgreen")
         self.create_sprites()
-        self.text = Text(self, text=f"Score: {Score:.0f}", x=50, y=20)
+        self.score = 0
+        self.text = Text(self, text=f"Score: {self.score:.0f}", x=50, y=20)
         self.elements.append(self.text)
 
 
@@ -140,7 +140,7 @@ class FlappyDot(GameApp):
     # new version of collision
     def collision(self):
         def send_message():
-            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {Score:.0f}")
+            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score:.0f}")
             self.parent.destroy()
 
         dot_hitbox = self.dot.hitbox.get_hitbox()  # x1, y1, x2, y2
@@ -164,14 +164,13 @@ class FlappyDot(GameApp):
                 send_message()
 
     def check_score(self):
-        global Score
         dot_hitbox = self.dot.hitbox.get_hitbox()
         for pillars in self.pillars:
             upper_hitbox = pillars.upper_pillar.hitbox.get_hitbox()
             lower_hitbox = pillars.lower_pillar.hitbox.get_hitbox()
             if dot_hitbox[0] >= upper_hitbox[2] or dot_hitbox[0] >= lower_hitbox[2]:
-                Score += 0.04761904761
-        self.text.set_text(f"Score: {Score:.0f}")
+                self.score += 0.04761904761
+        self.text.set_text(f"Score: {self.score:.0f}")
 
     def animate(self):
         for elem in self.elements:
