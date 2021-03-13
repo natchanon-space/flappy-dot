@@ -85,6 +85,7 @@ class PillarPair:
     def reset(self):
         self.is_started = False
 
+
 class FlappyDot(GameApp):
     def create_sprites(self):
         #create dot
@@ -118,12 +119,26 @@ class FlappyDot(GameApp):
                 self."""
 
     def collision(self):
+        # pull pillar from the element
+        self.pillar_upper_ele = self.elements[1].upper_pillar
+        self.pillar_lower_ele = self.elements[1].lower_pillar
         if self.dot.get_coords()[1] < - 300:
-            messagebox.showinfo(title="Flappy Birds", message="You lose! Score: XXX")
+            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
             root.destroy()
         elif self.dot.get_coords()[1] > CANVAS_HEIGHT + 50:
-            messagebox.showinfo(title="Flappy Birds", message="You lose! Score: XXX")
+            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
             root.destroy()
+        elif self.dot.get_coords()[0] >= self.pillar_upper_ele.hitbox.get_hitbox()[0] \
+                and self.dot.get_coords()[1] <= self.pillar_upper_ele.hitbox.get_hitbox()[2]:
+            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
+            root.destroy()
+        """elif self.dot.get_coords()[0] >= self.pillar_lower_ele.hitbox.get_hitbox()[0] \
+                and self.dot.get_coords()[1] >= self.pillar_lower_ele.hitbox.get_hitbox()[2]:
+            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
+            root.destroy()"""
+        if self.dot.get_coords()[0] == self.pillar_upper_ele.x:
+            self.score += 1
+
 
     def animate(self):
         for elem in self.elements:
