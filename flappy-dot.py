@@ -7,25 +7,25 @@ CANVAS_WIDTH = 800
 CANVAS_HEIGHT = 500
 
 UPDATE_DELAY = 33
-GRAVITY = 2 
+GRAVITY = 2
 
 PILLAR_SPEED = 5
 STARTING_VELOCITY = -20
 JUMP_VELOCITY = 30
-
+Score = 0
 
 class Dot(Sprite):
     def init_element(self):
         self.vy = STARTING_VELOCITY
         self.is_started = False
-    
+
     def update(self):
         if self.is_started:
             self.y += self.vy
             self.vy += GRAVITY
             # update hit box
             self.hitbox_update()
-    
+
     def start(self):
         self.is_started = True
 
@@ -54,31 +54,31 @@ class PillarPair:
 
     def reset_pillars(self):
         # farthest place on x-axis
-        self.upper_pillar.x = CANVAS_WIDTH + self.upper_pillar.width/2
-        self.lower_pillar.x = CANVAS_WIDTH + self.lower_pillar.width/2
+        self.upper_pillar.x = CANVAS_WIDTH + self.upper_pillar.width / 2
+        self.lower_pillar.x = CANVAS_WIDTH + self.lower_pillar.width / 2
         # random space between pillars
         self.rand_point()
-        self.upper_pillar.y = self.rp - self.space/2 - self.upper_pillar.height/2
-        self.lower_pillar.y = self.rp + self.space/2 + self.lower_pillar.height/2
+        self.upper_pillar.y = self.rp - self.space / 2 - self.upper_pillar.height / 2
+        self.lower_pillar.y = self.rp + self.space / 2 + self.lower_pillar.height / 2
 
     # custom update
     def update(self):
         if self.is_started:
             self.upper_pillar.x -= PILLAR_SPEED
             self.lower_pillar.x -= PILLAR_SPEED
-            if self.upper_pillar.x + self.upper_pillar.width/2 <= 0:
+            if self.upper_pillar.x + self.upper_pillar.width / 2 <= 0:
                 self.reset_pillars()
             # update hit box
             self.upper_pillar.hitbox_update()
             self.lower_pillar.hitbox_update()
-        
+
     # custom render
     def render(self):
         self.upper_pillar.render()
         self.lower_pillar.render()
 
     def rand_point(self):
-        self.rp = random.randint(self.space/2+10, CANVAS_HEIGHT-self.space/2-10)
+        self.rp = random.randint(self.space / 2 + 10, CANVAS_HEIGHT - self.space / 2 - 10)
 
     def start(self):
         self.is_started = True
@@ -88,63 +88,98 @@ class PillarPair:
 
 
 class FlappyDot(GameApp):
+    global Score
     def create_sprites(self):
         # create dot
-        self.dot = Dot(self, 'images/dot.png', CANVAS_WIDTH//6, CANVAS_HEIGHT//2, show_hitbox=True)
+        self.dot = Dot(self, 'images/dot.png', CANVAS_WIDTH // 6, CANVAS_HEIGHT // 2, show_hitbox=True)
+
+        # separate dot and pillar from elements (it's easier for collision checking :D)
+        self.pillars = []
+        self.pillars.append(PillarPair(self, show_hitbox=True))
+
+        self.elements = [p for p in self.pillars]
         self.elements.append(self.dot)
 
-        self.pillars = PillarPair(self, show_hitbox=True)
-        self.elements.append(self.pillars)
-        
     def init_game(self):
         self.canvas.config(background="lightgreen")
         self.create_sprites()
-        self.score = 0
-        self.text = Text(self, text=f"Score: {self.score}", x=50, y=20)
+        self.text = Text(self, text=f"Score: {Score:.0f}", x=50, y=20)
         self.elements.append(self.text)
+
 
     def on_key_pressed(self, event):
         if event.char == ' ':
             if not self.dot.is_started:
                 self.dot.start()
-                self.pillars.start()
+                for p in self.pillars:
+                    p.start()
             else:
                 self.dot.jump()
 
-    """def toggle_animate(self):
-            self.is_animating = not self.is_animating
-            if self.is_animating:
-                self.
-                self.animate()
-            else:
-                self."""
+    # def collision(self):
+    #     # pull pillar from the element
+    #     self.pillar_upper_ele = self.elements[1].upper_pillar
+    #     self.pillar_lower_ele = self.elements[1].lower_pillar
+    #     if self.dot.get_coords()[1] < - 300:
+    #         messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
+    #         root.destroy()
+    #     elif self.dot.get_coords()[1] > CANVAS_HEIGHT + 50:
+    #         messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
+    #         root.destroy()
+    #     elif self.dot.hitbox.get_hitbox()[0] >= self.pillar_upper_ele.hitbox.get_hitbox()[0] - 10\
+    #             and self.dot.hitbox.get_hitbox()[3] <= self.pillar_upper_ele.hitbox.get_hitbox()[3]:
+    #         # upper pillar collision
+    #         messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
+    #         root.destroy()
+    #     elif self.dot.hitbox.get_hitbox()[0] >= self.pillar_lower_ele.hitbox.get_hitbox()[0] - 10\
+    #             and self.dot.hitbox.get_hitbox()[1] >= self.pillar_lower_ele.hitbox.get_hitbox()[1]:
+    #         # lower pillar collision
+    #         messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
+    #         root.destroy()
 
+    # new version of collision
     def collision(self):
-        # pull pillar from the element
-        self.pillar_upper_ele = self.elements[1].upper_pillar
-        self.pillar_lower_ele = self.elements[1].lower_pillar
-        if self.dot.get_coords()[1] < - 300:
-            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
-            root.destroy()
-        elif self.dot.get_coords()[1] > CANVAS_HEIGHT + 50:
-            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
-            root.destroy()
-        elif self.dot.hitbox.get_hitbox()[0] >= self.pillar_upper_ele.hitbox.get_hitbox()[0] - 10\
-                and self.dot.hitbox.get_hitbox()[3] <= self.pillar_upper_ele.hitbox.get_hitbox()[3]:
-            # upper pillar collision
-            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
-            root.destroy()
-        elif self.dot.hitbox.get_hitbox()[0] >= self.pillar_lower_ele.hitbox.get_hitbox()[0] - 10\
-                and self.dot.hitbox.get_hitbox()[1] >= self.pillar_lower_ele.hitbox.get_hitbox()[1]:
-            # lower pillar collision
-            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
-            root.destroy()
+        def send_message():
+            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {Score:.0f}")
+            self.parent.destroy()
+
+        dot_hitbox = self.dot.hitbox.get_hitbox()  # x1, y1, x2, y2
+        # upper floor collide
+        if dot_hitbox[1] < -300:
+            send_message()
+        # lower floor collide
+        if dot_hitbox[3] > CANVAS_HEIGHT + 10:
+            send_message()
+        # all pillars collide
+        for pillars in self.pillars:
+            upper_hitbox = pillars.upper_pillar.hitbox.get_hitbox()
+            lower_hitbox = pillars.lower_pillar.hitbox.get_hitbox()
+            # upper pillar
+            if upper_hitbox[0] <= dot_hitbox[2] <= upper_hitbox[2] and upper_hitbox[1] <= dot_hitbox[1] <= upper_hitbox[
+                3]:
+                send_message()
+            # lower pillar
+            if lower_hitbox[0] <= dot_hitbox[2] <= lower_hitbox[2] and lower_hitbox[1] <= dot_hitbox[3] <= lower_hitbox[
+                3]:
+                send_message()
+
+    def check_score(self):
+        global Score
+        dot_hitbox = self.dot.hitbox.get_hitbox()
+        for pillars in self.pillars:
+            upper_hitbox = pillars.upper_pillar.hitbox.get_hitbox()
+            lower_hitbox = pillars.lower_pillar.hitbox.get_hitbox()
+            if dot_hitbox[0] >= upper_hitbox[2] or dot_hitbox[0] >= lower_hitbox[2]:
+                Score += 0.04761904761
+        self.text.set_text(f"Score: {Score:.0f}")
 
     def animate(self):
         for elem in self.elements:
             elem.update()
             elem.render()
-            self.collision()
+
+        self.collision()
+        self.check_score()
         self.after_id = self.after(self.update_delay, self.animate)
 
 
