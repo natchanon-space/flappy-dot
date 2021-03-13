@@ -91,10 +91,13 @@ class FlappyDot(GameApp):
     def create_sprites(self):
         # create dot
         self.dot = Dot(self, 'images/dot.png', CANVAS_WIDTH//6, CANVAS_HEIGHT//2, show_hitbox=True)
-        self.elements.append(self.dot)
 
-        self.pillars = PillarPair(self, show_hitbox=True)
-        self.elements.append(self.pillars)
+        # separate dot and pillar from elements (it's easier for collision checking :D)
+        self.pillars = []
+        self.pillars.append(PillarPair(self, show_hitbox=True))
+
+        self.elements = [p for p in self.pillars]
+        self.elements.append(self.dot)
         
     def init_game(self):
         self.canvas.config(background="lightgreen")
@@ -107,36 +110,56 @@ class FlappyDot(GameApp):
         if event.char == ' ':
             if not self.dot.is_started:
                 self.dot.start()
-                self.pillars.start()
+                for p in self.pillars:
+                    p.start()
             else:
                 self.dot.jump()
 
+    # def collision(self):
+    #     # pull pillar from the element
+    #     self.pillar_upper_ele = self.elements[1].upper_pillar
+    #     self.pillar_lower_ele = self.elements[1].lower_pillar
+    #     if self.dot.get_coords()[1] < - 300:
+    #         messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
+    #         root.destroy()
+    #     elif self.dot.get_coords()[1] > CANVAS_HEIGHT + 50:
+    #         messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
+    #         root.destroy()
+    #     elif self.dot.hitbox.get_hitbox()[0] >= self.pillar_upper_ele.hitbox.get_hitbox()[0] - 10\
+    #             and self.dot.hitbox.get_hitbox()[3] <= self.pillar_upper_ele.hitbox.get_hitbox()[3]:
+    #         # upper pillar collision
+    #         messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
+    #         root.destroy()
+    #     elif self.dot.hitbox.get_hitbox()[0] >= self.pillar_lower_ele.hitbox.get_hitbox()[0] - 10\
+    #             and self.dot.hitbox.get_hitbox()[1] >= self.pillar_lower_ele.hitbox.get_hitbox()[1]:
+    #         # lower pillar collision
+    #         messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
+    #         root.destroy()
+
+    # new version of collision
     def collision(self):
-        # pull pillar from the element
-        self.pillar_upper_ele = self.elements[1].upper_pillar
-        self.pillar_lower_ele = self.elements[1].lower_pillar
-        if self.dot.get_coords()[1] < - 300:
+        def send_message():
             messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
-            root.destroy()
-        elif self.dot.get_coords()[1] > CANVAS_HEIGHT + 50:
-            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
-            root.destroy()
-        elif self.dot.hitbox.get_hitbox()[0] >= self.pillar_upper_ele.hitbox.get_hitbox()[0] - 10\
-                and self.dot.hitbox.get_hitbox()[3] <= self.pillar_upper_ele.hitbox.get_hitbox()[3]:
-            # upper pillar collision
-            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
-            root.destroy()
-        elif self.dot.hitbox.get_hitbox()[0] >= self.pillar_lower_ele.hitbox.get_hitbox()[0] - 10\
-                and self.dot.hitbox.get_hitbox()[1] >= self.pillar_lower_ele.hitbox.get_hitbox()[1]:
-            # lower pillar collision
-            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
-            root.destroy()
+            self.parent.destroy()
+
+        dot_hitbox = self.dot.hitbox.get_hitbox() # x1, y1, x2, y2
+        # upper floor collide
+        if dot_hitbox[1] < -300:
+            send_message()
+        # lower floor collide
+        if dot_hitbox[3] > CANVAS_HEIGHT + 50:
+            send_message()
+        # pillars collide
+        for pillars in self.pillars:
+            upper_hitbox = pillars.upper_pillar.hitbox.get_hitbox()
+            lower_hitbox = pillars.lower_pillar.hitbox.get_hitbox()
 
     def animate(self):
         for elem in self.elements:
             elem.update()
             elem.render()
-            self.collision()
+
+        self.collision()
         self.after_id = self.after(self.update_delay, self.animate)
 
 
