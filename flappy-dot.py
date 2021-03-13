@@ -87,7 +87,6 @@ class PillarPair:
 
 
 class FlappyDot(GameApp):
-    global Score
     def create_sprites(self):
         # create dot
         self.dot = Dot(self, 'images/dot.png', CANVAS_WIDTH // 6, CANVAS_HEIGHT // 2, show_hitbox=True)
@@ -144,6 +143,7 @@ class FlappyDot(GameApp):
             self.parent.destroy()
 
         dot_hitbox = self.dot.hitbox.get_hitbox()  # x1, y1, x2, y2
+
         # upper floor collide
         if dot_hitbox[1] < -300:
             send_message()
@@ -179,6 +179,7 @@ class FlappyDot(GameApp):
 
         self.collision()
         self.check_score()
+
         self.after_id = self.after(self.update_delay, self.animate)
 
 
