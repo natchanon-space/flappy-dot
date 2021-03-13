@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 
+
 class GameApp(ttk.Frame):
     def __init__(self, parent, canvas_width=800, canvas_height=500, update_delay=33):
         super().__init__(parent)
@@ -78,6 +79,7 @@ class GameElement():
         """ init element properties """
         pass
 
+
 class Text(GameElement):
     def __init__(self, game_app, text, x=0, y=0):
         self.text = text
@@ -90,13 +92,14 @@ class Text(GameElement):
         self.text = text
         self.canvas.itemconfigure(self.object_id, text=self.text)
 
+
 class Sprite(GameElement):
     def __init__(self, game_app, image_filename, x=0, y=0, show_hitbox=False):
         self.image_filename = image_filename
         self.show_hitbox = show_hitbox
         super().__init__(game_app, x, y)
         # show/hide hitbox
-        self.hitbox = hitbox(game_app, x, y, self.width, self.height)
+        self.hitbox = Hitbox(game_app, x, y, self.width, self.height)
         if self.show_hitbox:
             self.hitbox.show()
         else:
@@ -120,7 +123,8 @@ class Sprite(GameElement):
         super().render()
         self.hitbox.render()
 
-class hitbox(GameElement):
+
+class Hitbox(GameElement):
     def __init__(self, game_app, x, y, width, height):
         self.width = width
         self.height = height
