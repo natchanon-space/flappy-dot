@@ -147,12 +147,18 @@ class FlappyDot(GameApp):
         if dot_hitbox[1] < -300:
             send_message()
         # lower floor collide
-        if dot_hitbox[3] > CANVAS_HEIGHT + 50:
+        if dot_hitbox[3] > CANVAS_HEIGHT + 10:
             send_message()
-        # pillars collide
+        # all pillars collide
         for pillars in self.pillars:
             upper_hitbox = pillars.upper_pillar.hitbox.get_hitbox()
             lower_hitbox = pillars.lower_pillar.hitbox.get_hitbox()
+            # upper pillar
+            if upper_hitbox[0] <= dot_hitbox[2] <= upper_hitbox[2] and upper_hitbox[1] <= dot_hitbox[1] <= upper_hitbox[3]:
+                send_message()
+            # lower pillar
+            if lower_hitbox[0] <= dot_hitbox[2] <= lower_hitbox[2] and lower_hitbox[1] <= dot_hitbox[3] <= lower_hitbox[3]:
+                send_message()
 
     def animate(self):
         for elem in self.elements:
