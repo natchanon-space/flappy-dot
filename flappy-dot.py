@@ -111,14 +111,6 @@ class FlappyDot(GameApp):
             else:
                 self.dot.jump()
 
-    """def toggle_animate(self):
-            self.is_animating = not self.is_animating
-            if self.is_animating:
-                self.
-                self.animate()
-            else:
-                self."""
-
     def collision(self):
         # pull pillar from the element
         self.pillar_upper_ele = self.elements[1].upper_pillar
