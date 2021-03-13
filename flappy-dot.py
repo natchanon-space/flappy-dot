@@ -12,6 +12,23 @@ PILLAR_SPEED = 5
 STARTING_VELOCITY = -20
 JUMP_VELOCITY = 30
 
+def check_collide(hitbox1, hitbox2):
+    """ checking function that return hitbox1 collide hitbox2 or not """
+    """
+        >>> is_in((0, 0, 1, 1), (0, 0, 0, 0))
+        True
+        >>> is_in((0, 0, 0, 0), (2, 2, 4, 4))
+        False
+    """
+    x1, y1, x2, y2 = hitbox1 # some dot
+    # is a point in a hitbox?
+    def is_in(point, hitbox):
+        x, y = point
+        x1, y1, x2, y2 = hitbox1
+        return (x1 <= x <= x2 and y1 <= y <= y2)
+    # checking all four corner of hitbox1
+    return (is_in((x1, y1), hitbox2) or is_in((x1, y2), hitbox2) or is_in((x2, y1), hitbox2) or is_in((x2, y2), hitbox2))
+
 class Dot(Sprite):
     def init_element(self):
         self.vy = STARTING_VELOCITY
