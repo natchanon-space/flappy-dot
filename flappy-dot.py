@@ -95,7 +95,6 @@ class PillarPair:
 
 
 class FlappyDot(GameApp):
-    global Score
     def create_sprites(self):
         # create dot
         self.dot = Dot(self, 'images/dot.png', CANVAS_WIDTH // 6, CANVAS_HEIGHT // 2, show_hitbox=False)
@@ -106,14 +105,16 @@ class FlappyDot(GameApp):
             self.pillars.append(PillarPair(self, show_hitbox=False, extend_x=i * 220))
 
         self.elements = [p for p in self.pillars]
-        self.elements.append(self.dot)
+        self.elements.append(self.dot) 
 
     def init_game(self):
+        self.score = 0  
+
         self.canvas.config(background="lightgreen")
         self.create_sprites()
 
-        self.text = Text(self, text=f"Score: {Score:.0f}", x=50, y=20)
-        self.start_txt = Text(self, text=f"Press Spacebar", x=CANVAS_WIDTH/2, y=CANVAS_HEIGHT - 75, font=('Garamond', 50))
+        self.text = Text(self, text=f"Score: {self.score:.0f}", x=50, y=20)
+        self.start_txt = Text(self, text=f"Press Spacebar to Start", x=CANVAS_WIDTH/2, y=CANVAS_HEIGHT - 75, font=('Garamond', 50))
 
         self.elements.append(self.text)
 
@@ -151,7 +152,7 @@ class FlappyDot(GameApp):
     # new version of collision
     def collision(self):
         def send_message():
-            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {Score:.0f}"                                                              + "\n" + f"Retry?" + "\n" + "Space bar to retry")
+            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score:.0f}"                                                              + "\n" + f"Retry?" + "\n" + "Space bar to retry")
             self.restart()
 
         dot_hitbox = self.dot.hitbox.get_hitbox()  # x1, y1, x2, y2
@@ -186,8 +187,7 @@ class FlappyDot(GameApp):
         self.text.set_text(f"Score: {self.score:.0f}")
 
     def restart(self):
-        global Score
-        Score = 0
+        self.score = 0
         self.parent.destroy()
         main()
 
