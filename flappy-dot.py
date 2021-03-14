@@ -2,6 +2,8 @@ import tkinter as tk
 import random
 from gamelib import *
 from tkinter import messagebox
+import os
+
 
 CANVAS_WIDTH = 800
 CANVAS_HEIGHT = 500
@@ -12,6 +14,7 @@ GRAVITY = 2
 PILLAR_SPEED = 5
 STARTING_VELOCITY = -20
 JUMP_VELOCITY = 30
+
 
 class Dot(Sprite):
     def init_element(self):
@@ -59,6 +62,7 @@ class PillarPair:
         else:
             self.upper_pillar.x = CANVAS_WIDTH + self.upper_pillar.width / 2
             self.lower_pillar.x = CANVAS_WIDTH + self.lower_pillar.width / 2
+
         # random space between pillars
         self.rand_point()
         self.upper_pillar.y = self.rp - self.space / 2 - self.upper_pillar.height / 2
@@ -98,18 +102,21 @@ class FlappyDot(GameApp):
         # separate dot and pillar from elements (it's easier for collision checking :D)
         self.pillars = []
         for i in range(4):
-            self.pillars.append(PillarPair(self, show_hitbox=False, extend_x=i*220))
+            self.pillars.append(PillarPair(self, show_hitbox=False, extend_x=i * 220))
 
         self.elements = [p for p in self.pillars]
-        self.elements.append(self.dot)
+        self.elements.append(self.dot) 
 
     def init_game(self):
+        self.score = 0  
+
         self.canvas.config(background="lightgreen")
         self.create_sprites()
-        self.score = 0
-        self.text = Text(self, text=f"Score: {self.score:.0f}", x=50, y=20)
-        self.elements.append(self.text)
 
+        self.text = Text(self, text=f"Score: {self.score:.0f}", x=50, y=20)
+        self.start_txt = Text(self, text=f"Press Spacebar to Start", x=CANVAS_WIDTH/2, y=CANVAS_HEIGHT - 75, font=('Garamond', 50))
+
+        self.elements.append(self.text)
 
     def on_key_pressed(self, event):
         if event.char == ' ':
@@ -119,6 +126,7 @@ class FlappyDot(GameApp):
                     p.start()
             else:
                 self.dot.jump()
+        self.start_txt.set_text(" ")
 
     # def collision(self):
     #     # pull pillar from the element
@@ -144,14 +152,15 @@ class FlappyDot(GameApp):
     # new version of collision
     def collision(self):
         def send_message():
-            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score:.0f}")
-            self.parent.destroy()
+            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score:.0f}"                                                              + "\n" + f"Retry?" + "\n" + "Space bar to retry")
+            self.restart()
 
         dot_hitbox = self.dot.hitbox.get_hitbox()  # x1, y1, x2, y2
 
         # upper floor collide
         if dot_hitbox[1] < -300:
             send_message()
+
         # lower floor collide
         if dot_hitbox[3] > CANVAS_HEIGHT + 10:
             send_message()
@@ -177,6 +186,11 @@ class FlappyDot(GameApp):
                 self.score += 0.04761904761
         self.text.set_text(f"Score: {self.score:.0f}")
 
+    def restart(self):
+        self.score = 0
+        self.parent.destroy()
+        main()
+
     def animate(self):
         for elem in self.elements:
             elem.update()
@@ -188,7 +202,7 @@ class FlappyDot(GameApp):
         self.after_id = self.after(self.update_delay, self.animate)
 
 
-if __name__ == "__main__":
+def main():
     root = tk.Tk()
     root.title("Avocado Flight")
     root.resizable(0, 0)
@@ -197,3 +211,8 @@ if __name__ == "__main__":
     app.start()
 
     root.mainloop()
+
+
+if __name__ == "__main__":
+    main()
+

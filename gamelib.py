@@ -43,7 +43,7 @@ class GameApp(ttk.Frame):
 
     def on_key_released(self, event):
         pass
-    
+
 
 class GameElement():
     def __init__(self, game_app, x=0, y=0):
@@ -81,12 +81,13 @@ class GameElement():
 
 
 class Text(GameElement):
-    def __init__(self, game_app, text, x=0, y=0):
+    def __init__(self, game_app, text, font=0, x=0, y=0):
         self.text = text
+        self.font = font
         super().__init__(game_app, x, y)
         
     def init_canvas_object(self):
-        self.object_id = self.canvas.create_text(self.x, self.y, text=self.text)
+        self.object_id = self.canvas.create_text(self.x, self.y, text=self.text, font=self.font)
 
     def set_text(self, text):
         self.text = text
