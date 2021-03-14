@@ -43,7 +43,7 @@ class GameApp(ttk.Frame):
 
     def on_key_released(self, event):
         pass
-    
+
 
 class GameElement():
     def __init__(self, game_app, x=0, y=0):
