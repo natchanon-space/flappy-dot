@@ -1,103 +1,199 @@
 import tkinter as tk
 import random
 from gamelib import *
+from tkinter import messagebox
 
 CANVAS_WIDTH = 800
 CANVAS_HEIGHT = 500
 
 UPDATE_DELAY = 33
+GRAVITY = 2
+
 PILLAR_SPEED = 5
+STARTING_VELOCITY = -20
+JUMP_VELOCITY = 30
 
-GRAVITY = 1
+class Dot(Sprite):
+    def init_element(self):
+        self.vy = STARTING_VELOCITY
+        self.is_started = False
 
-class PillarPair():
-    def __init__(self, game_app, speed, expand_x=0, color="green"):
-        self.canvas = game_app.canvas
-        self.canvas_height = game_app.canvas_height
-        self.canvas_width = game_app.canvas_width
-        self.color = color
-        self.speed = speed
-        self.expand_x = expand_x
-
-        self.create_pillars()
-        
     def update(self):
-        self.upper_pillar.x -= self.speed
-        self.lower_pillar.x -= self.speed
-        if self.upper_pillar.x + self.upper_pillar.size_x < 0:
-            self.reset()
+        if self.is_started:
+            self.y += self.vy
+            self.vy += GRAVITY
+            # update hit box
+            self.hitbox_update()
 
+    def start(self):
+        self.is_started = True
+
+    def jump(self):
+        self.vy -= JUMP_VELOCITY
+
+    def reset(self):
+        self.is_started = False
+
+    def get_coords(self):
+        return (self.x, self.y)
+
+
+class PillarPair:
+    def __init__(self, game_app, space=150, show_hitbox=False, extend_x=0):
+        self.is_started = False
+        self.space = space
+        self.extend_x = extend_x
+        self.show_hitbox = show_hitbox
+
+        # create pillars
+        # change create lower pillar location
+        self.upper_pillar = Sprite(game_app, "images/pillar-top.png", x=500, y=0, show_hitbox=show_hitbox)
+        self.lower_pillar = Sprite(game_app, "images/pillar-bottom.png", x=500, y=0, show_hitbox=show_hitbox)
+        self.reset_pillars(is_init=True)
+
+    def reset_pillars(self, is_init=False):
+        # farthest place on x-axis
+        if is_init:
+            self.upper_pillar.x = CANVAS_WIDTH + self.upper_pillar.width / 2 + self.extend_x
+            self.lower_pillar.x = CANVAS_WIDTH + self.lower_pillar.width / 2 + self.extend_x
+        else:
+            self.upper_pillar.x = CANVAS_WIDTH + self.upper_pillar.width / 2
+            self.lower_pillar.x = CANVAS_WIDTH + self.lower_pillar.width / 2
+        # random space between pillars
+        self.rand_point()
+        self.upper_pillar.y = self.rp - self.space / 2 - self.upper_pillar.height / 2
+        self.lower_pillar.y = self.rp + self.space / 2 + self.lower_pillar.height / 2
+
+    # custom update
+    def update(self):
+        if self.is_started:
+            self.upper_pillar.x -= PILLAR_SPEED
+            self.lower_pillar.x -= PILLAR_SPEED
+            if self.upper_pillar.x + self.upper_pillar.width / 2 <= 0:
+                self.reset_pillars()
+            # update hit box
+            self.upper_pillar.hitbox_update()
+            self.lower_pillar.hitbox_update()
+
+    # custom render
     def render(self):
         self.upper_pillar.render()
         self.lower_pillar.render()
 
-    def create_pillars(self):
-        self.set_pillars_info()
-        self.upper_pillar = Contour(self, "r", color="blue", x=self.canvas_width+self.width+self.expand_x, y=self.upper_y, size_x=self.width, size_y=self.upper_height)
-        self.lower_pillar = Contour(self, "r", color="red", x=self.canvas_width+self.width+self.expand_x, y=self.lower_y, size_x=self.width, size_y=self.lower_height)
+    def rand_point(self):
+        self.rp = random.randint(self.space / 2 + 10, CANVAS_HEIGHT - self.space / 2 - 10)
 
-    def set_pillars_info(self):
-        rand_point = random.randint(100, self.canvas_height-100)
-        space = 150
-        self.width = self.canvas_width / 10
-
-        self.upper_height = rand_point - space/2
-        self.upper_y = self.upper_height/2
-
-        self.lower_height = self.canvas_height - rand_point - space/2
-        self.lower_y = self.canvas_height - self.lower_height/2
+    def start(self):
+        self.is_started = True
 
     def reset(self):
-        self.set_pillars_info()
-        self.upper_pillar.set_shape(self.canvas_width+self.width, self.upper_y, self.width, self.upper_height)
-        self.lower_pillar.set_shape(self.canvas_width+self.width, self.lower_y, self.width, self.lower_height)
-
-    def get_hitbox(self):
-        return self.upper_pillar.get_hitbox(), self.lower_pillar.get_hitbox()
-
-class Dot(Contour):
-    def __init__(self, game_app, size, color="green", x=0, y=0, size_x=20, size_y=20, gravity=GRAVITY):
-        super().__init__(game_app, "c", color=color, x=x, y=y, size_x=size_x, size_y=size_y)
-        self.gravity = gravity
-        
-    def init_element(self):
-        self.vy = 0
-
-    def update(self):
-        self.y += self.vy
-        self.vy += self.gravity
-
-    def increase_speed(self):
-        pass
+        self.is_started = False
 
 
 class FlappyDot(GameApp):
-    def init_game(self):
-        self.create_pillars()
+    def create_sprites(self):
+        # create dot
+        self.dot = Dot(self, 'images/dot.png', CANVAS_WIDTH // 6, CANVAS_HEIGHT // 2, show_hitbox=True)
 
-        self.dot = Dot(self, "c", color="green", x=50, y=self.canvas_height/2, size_x=20, size_y=20)
+        # separate dot and pillar from elements (it's easier for collision checking :D)
+        self.pillars = []
+        for i in range(4):
+            self.pillars.append(PillarPair(self, show_hitbox=True, extend_x=i*220))
+
+        self.elements = [p for p in self.pillars]
         self.elements.append(self.dot)
 
-        self.text = Text(self, text="Score: XX", x=50, y=20)
+    def init_game(self):
+        self.canvas.config(background="lightgreen")
+        self.create_sprites()
+        self.score = 0
+        self.text = Text(self, text=f"Score: {self.score:.0f}", x=50, y=20)
         self.elements.append(self.text)
 
-    def create_pillars(self):
-        for i in range(5):
-            self.elements.append(PillarPair(self, PILLAR_SPEED, expand_x=i*190))
 
     def on_key_pressed(self, event):
-        if event.char == " ":
-            self.dot.vy -= 12
+        if event.char == ' ':
+            if not self.dot.is_started:
+                self.dot.start()
+                for p in self.pillars:
+                    p.start()
+            else:
+                self.dot.jump()
+
+    # def collision(self):
+    #     # pull pillar from the element
+    #     self.pillar_upper_ele = self.elements[1].upper_pillar
+    #     self.pillar_lower_ele = self.elements[1].lower_pillar
+    #     if self.dot.get_coords()[1] < - 300:
+    #         messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
+    #         root.destroy()
+    #     elif self.dot.get_coords()[1] > CANVAS_HEIGHT + 50:
+    #         messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
+    #         root.destroy()
+    #     elif self.dot.hitbox.get_hitbox()[0] >= self.pillar_upper_ele.hitbox.get_hitbox()[0] - 10\
+    #             and self.dot.hitbox.get_hitbox()[3] <= self.pillar_upper_ele.hitbox.get_hitbox()[3]:
+    #         # upper pillar collision
+    #         messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
+    #         root.destroy()
+    #     elif self.dot.hitbox.get_hitbox()[0] >= self.pillar_lower_ele.hitbox.get_hitbox()[0] - 10\
+    #             and self.dot.hitbox.get_hitbox()[1] >= self.pillar_lower_ele.hitbox.get_hitbox()[1]:
+    #         # lower pillar collision
+    #         messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
+    #         root.destroy()
+
+    # new version of collision
+    def collision(self):
+        def send_message():
+            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score:.0f}")
+            self.parent.destroy()
+
+        dot_hitbox = self.dot.hitbox.get_hitbox()  # x1, y1, x2, y2
+
+        # upper floor collide
+        if dot_hitbox[1] < -300:
+            send_message()
+        # lower floor collide
+        if dot_hitbox[3] > CANVAS_HEIGHT + 10:
+            send_message()
+        # all pillars collide
+        for pillars in self.pillars:
+            upper_hitbox = pillars.upper_pillar.hitbox.get_hitbox()
+            lower_hitbox = pillars.lower_pillar.hitbox.get_hitbox()
+            # upper pillar
+            if upper_hitbox[0] <= dot_hitbox[2] <= upper_hitbox[2] and upper_hitbox[1] <= dot_hitbox[1] <= upper_hitbox[
+                3]:
+                send_message()
+            # lower pillar
+            if lower_hitbox[0] <= dot_hitbox[2] <= lower_hitbox[2] and lower_hitbox[1] <= dot_hitbox[3] <= lower_hitbox[
+                3]:
+                send_message()
+
+    def check_score(self):
+        dot_hitbox = self.dot.hitbox.get_hitbox()
+        for pillars in self.pillars:
+            upper_hitbox = pillars.upper_pillar.hitbox.get_hitbox()
+            lower_hitbox = pillars.lower_pillar.hitbox.get_hitbox()
+            if dot_hitbox[0] >= upper_hitbox[2] or dot_hitbox[0] >= lower_hitbox[2]:
+                self.score += 0.04761904761
+        self.text.set_text(f"Score: {self.score:.0f}")
+
+    def animate(self):
+        for elem in self.elements:
+            elem.update()
+            elem.render()
+
+        self.collision()
+        self.check_score()
+
+        self.after_id = self.after(self.update_delay, self.animate)
+
 
 if __name__ == "__main__":
     root = tk.Tk()
+    root.title("Avocado Flight")
     root.resizable(0, 0)
 
     app = FlappyDot(root, CANVAS_WIDTH, CANVAS_HEIGHT)
     app.start()
-
-    # print(app.circle.get_hitbox())
-    # print(app.rectangle.get_hitbox())
-    # print(app.test_text.text)
 
     root.mainloop()

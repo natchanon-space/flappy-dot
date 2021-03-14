@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 
+
 class GameApp(ttk.Frame):
     def __init__(self, parent, canvas_width=800, canvas_height=500, update_delay=33):
         super().__init__(parent)
@@ -42,6 +43,7 @@ class GameApp(ttk.Frame):
 
     def on_key_released(self, event):
         pass
+    
 
 class GameElement():
     def __init__(self, game_app, x=0, y=0):
@@ -60,7 +62,7 @@ class GameElement():
 
     def hide(self):
         self.is_visible = False
-        self.canvas.itemconfigure(self.object_id, state="hiden")
+        self.canvas.itemconfigure(self.object_id, state="hidden")
 
     def update(self):
         pass
@@ -77,6 +79,7 @@ class GameElement():
         """ init element properties """
         pass
 
+
 class Text(GameElement):
     def __init__(self, game_app, text, x=0, y=0):
         self.text = text
@@ -89,44 +92,50 @@ class Text(GameElement):
         self.text = text
         self.canvas.itemconfigure(self.object_id, text=self.text)
 
-class Contour(GameElement):
-    def __init__(self, game_app, shape, color="blue", x=0, y=0, size_x=5, size_y=5):
-        self.shape = shape
-        self.size_x = size_x
-        self.size_y = size_y
-        self.color = color
+
+class Sprite(GameElement):
+    def __init__(self, game_app, image_filename, x=0, y=0, show_hitbox=False):
+        self.image_filename = image_filename
+        self.show_hitbox = show_hitbox
+        super().__init__(game_app, x, y)
+        # show/hide hitbox
+        self.hitbox = Hitbox(game_app, x, y, self.width, self.height)
+        if self.show_hitbox:
+            self.hitbox.show()
+        else:
+            self.hitbox.hide()
+
+    # replace previous render for smoother motions
+    def init_canvas_object(self):
+        self.photo_image = tk.PhotoImage(file=self.image_filename)
+        self.width = self.photo_image.width()
+        self.height = self.photo_image.height()
+        self.object_id = self.canvas.create_image(
+            self.x, 
+            self.y,
+            image=self.photo_image)
+
+    def hitbox_update(self):
+        self.hitbox.x = self.x
+        self.hitbox.y = self.y
+
+    def render(self):
+        super().render()
+        self.hitbox.render()
+
+
+class Hitbox(GameElement):
+    def __init__(self, game_app, x, y, width, height):
+        self.width = width
+        self.height = height
         super().__init__(game_app, x, y)
 
     def init_canvas_object(self):
-        if self.shape == "c" or self.shape == "circle":
-            self.object_id = self.canvas.create_oval(self.x-self.size_x/2, 
-                                                     self.y-self.size_y/2,
-                                                     self.x+self.size_x/2,
-                                                     self.y+self.size_y/2,
-                                                     fill=self.color)
-                                                     
-        elif self.shape == "r" or self.shape == "rectangle":
-            self.object_id = self.canvas.create_rectangle(self.x-self.size_x/2, 
-                                                          self.y-self.size_y/2,
-                                                          self.x+self.size_x/2,
-                                                          self.y+self.size_y/2,
-                                                          fill=self.color)
-
-        else:
-            raise TypeError(f"{self.shape} is not included")
-
-    def render(self):
-        self.canvas.coords(self.object_id,
-                           self.x-self.size_x/2, 
-                           self.y-self.size_y/2,
-                           self.x+self.size_x/2,
-                           self.y+self.size_y/2)
-
-    def set_shape(self, x, y, size_x, size_y):
-        self.x = x
-        self.y = y
-        self.size_x = size_x
-        self.size_y = size_y
+        self.object_id = self.canvas.create_rectangle(self.x-self.width/2, self.y-self.height/2, self.x+self.width/2, self.y+self.height/2)
 
     def get_hitbox(self):
-        return (self.x-self.size_x/2, self.y-self.size_y/2, self.x+self.size_x/2, self.size_y+self.size_y)
+        return self.x-self.width/2, self.y-self.height/2, self.x+self.width/2, self.y+self.height/2
+
+    def render(self):
+        if self.is_visible:
+            self.canvas.coords(self.object_id, self.x-self.width/2, self.y-self.height/2, self.x+self.width/2, self.y+self.height/2)
