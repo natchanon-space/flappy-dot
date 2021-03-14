@@ -14,7 +14,6 @@ GRAVITY = 2
 PILLAR_SPEED = 5
 STARTING_VELOCITY = -20
 JUMP_VELOCITY = 30
-Score = 0
 
 
 class Dot(Sprite):
@@ -53,12 +52,17 @@ class PillarPair:
         # change create lower pillar location
         self.upper_pillar = Sprite(game_app, "images/pillar-top.png", x=500, y=0, show_hitbox=show_hitbox)
         self.lower_pillar = Sprite(game_app, "images/pillar-bottom.png", x=500, y=0, show_hitbox=show_hitbox)
-        self.reset_pillars()
+        self.reset_pillars(is_init=True)
 
-    def reset_pillars(self):
+    def reset_pillars(self, is_init=False):
         # farthest place on x-axis
-        self.upper_pillar.x = CANVAS_WIDTH + self.upper_pillar.width / 2 + self.extend_x
-        self.lower_pillar.x = CANVAS_WIDTH + self.lower_pillar.width / 2 + self.extend_x
+        if is_init:
+            self.upper_pillar.x = CANVAS_WIDTH + self.upper_pillar.width / 2 + self.extend_x
+            self.lower_pillar.x = CANVAS_WIDTH + self.lower_pillar.width / 2 + self.extend_x
+        else:
+            self.upper_pillar.x = CANVAS_WIDTH + self.upper_pillar.width / 2
+            self.lower_pillar.x = CANVAS_WIDTH + self.lower_pillar.width / 2
+
         # random space between pillars
         self.rand_point()
         self.upper_pillar.y = self.rp - self.space / 2 - self.upper_pillar.height / 2
@@ -92,10 +96,9 @@ class PillarPair:
 
 class FlappyDot(GameApp):
     global Score
-
     def create_sprites(self):
         # create dot
-        self.dot = Dot(self, 'images/dot.png', CANVAS_WIDTH // 6, CANVAS_HEIGHT // 2, show_hitbox=True)
+        self.dot = Dot(self, 'images/dot.png', CANVAS_WIDTH // 6, CANVAS_HEIGHT // 2, show_hitbox=False)
 
         # separate dot and pillar from elements (it's easier for collision checking :D)
         self.pillars = []
@@ -108,8 +111,10 @@ class FlappyDot(GameApp):
     def init_game(self):
         self.canvas.config(background="lightgreen")
         self.create_sprites()
+
         self.text = Text(self, text=f"Score: {Score:.0f}", x=50, y=20)
         self.start_txt = Text(self, text=f"Press Spacebar", x=CANVAS_WIDTH/2, y=CANVAS_HEIGHT - 75, font=('Garamond', 50))
+
         self.elements.append(self.text)
 
     def on_key_pressed(self, event):
@@ -146,11 +151,11 @@ class FlappyDot(GameApp):
     # new version of collision
     def collision(self):
         def send_message():
-            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {Score:.0f}"
-                                                              + "\n" + f"Retry?" + "\n" + "Space bar to retry")
+            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {Score:.0f}"                                                              + "\n" + f"Retry?" + "\n" + "Space bar to retry")
             self.restart()
 
         dot_hitbox = self.dot.hitbox.get_hitbox()  # x1, y1, x2, y2
+
         # upper floor collide
         if dot_hitbox[1] < -300:
             send_message()
@@ -172,14 +177,13 @@ class FlappyDot(GameApp):
                 send_message()
 
     def check_score(self):
-        global Score
         dot_hitbox = self.dot.hitbox.get_hitbox()
         for pillars in self.pillars:
             upper_hitbox = pillars.upper_pillar.hitbox.get_hitbox()
             lower_hitbox = pillars.lower_pillar.hitbox.get_hitbox()
             if dot_hitbox[0] >= upper_hitbox[2] or dot_hitbox[0] >= lower_hitbox[2]:
-                Score += 0.04761904761
-        self.text.set_text(f"Score: {Score:.0f}")
+                self.score += 0.04761904761
+        self.text.set_text(f"Score: {self.score:.0f}")
 
     def restart(self):
         global Score
@@ -194,6 +198,7 @@ class FlappyDot(GameApp):
 
         self.collision()
         self.check_score()
+
         self.after_id = self.after(self.update_delay, self.animate)
 
 
