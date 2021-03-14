@@ -92,6 +92,7 @@ class PillarPair:
 
 class FlappyDot(GameApp):
     global Score
+
     def create_sprites(self):
         # create dot
         self.dot = Dot(self, 'images/dot.png', CANVAS_WIDTH // 6, CANVAS_HEIGHT // 2, show_hitbox=True)
@@ -108,6 +109,7 @@ class FlappyDot(GameApp):
         self.canvas.config(background="lightgreen")
         self.create_sprites()
         self.text = Text(self, text=f"Score: {Score:.0f}", x=50, y=20)
+        self.start_txt = Text(self, text=f"Press Spacebar", x=CANVAS_WIDTH/2, y=CANVAS_HEIGHT - 75, font=('Garamond', 50))
         self.elements.append(self.text)
 
     def on_key_pressed(self, event):
@@ -118,6 +120,7 @@ class FlappyDot(GameApp):
                     p.start()
             else:
                 self.dot.jump()
+        self.start_txt.set_text(" ")
 
     # def collision(self):
     #     # pull pillar from the element
