@@ -57,8 +57,8 @@ class PillarPair:
 
     def reset_pillars(self):
         # farthest place on x-axis
-        self.upper_pillar.x = CANVAS_WIDTH + self.upper_pillar.width / 2
-        self.lower_pillar.x = CANVAS_WIDTH + self.lower_pillar.width / 2
+        self.upper_pillar.x = CANVAS_WIDTH + self.upper_pillar.width / 2 + self.extend_x
+        self.lower_pillar.x = CANVAS_WIDTH + self.lower_pillar.width / 2 + self.extend_x
         # random space between pillars
         self.rand_point()
         self.upper_pillar.y = self.rp - self.space / 2 - self.upper_pillar.height / 2
@@ -98,7 +98,8 @@ class FlappyDot(GameApp):
 
         # separate dot and pillar from elements (it's easier for collision checking :D)
         self.pillars = []
-        self.pillars.append(PillarPair(self, show_hitbox=True))
+        for i in range(4):
+            self.pillars.append(PillarPair(self, show_hitbox=False, extend_x=i * 220))
 
         self.elements = [p for p in self.pillars]
         self.elements.append(self.dot)
@@ -178,6 +179,8 @@ class FlappyDot(GameApp):
         self.text.set_text(f"Score: {Score:.0f}")
 
     def restart(self):
+        global Score
+        Score = 0
         self.parent.destroy()
         main()
 
