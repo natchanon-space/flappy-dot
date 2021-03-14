@@ -49,12 +49,16 @@ class PillarPair:
         # change create lower pillar location
         self.upper_pillar = Sprite(game_app, "images/pillar-top.png", x=500, y=0, show_hitbox=show_hitbox)
         self.lower_pillar = Sprite(game_app, "images/pillar-bottom.png", x=500, y=0, show_hitbox=show_hitbox)
-        self.reset_pillars()
+        self.reset_pillars(is_init=True)
 
-    def reset_pillars(self):
+    def reset_pillars(self, is_init=False):
         # farthest place on x-axis
-        self.upper_pillar.x = CANVAS_WIDTH + self.upper_pillar.width / 2
-        self.lower_pillar.x = CANVAS_WIDTH + self.lower_pillar.width / 2
+        if is_init:
+            self.upper_pillar.x = CANVAS_WIDTH + self.upper_pillar.width / 2 + self.extend_x
+            self.lower_pillar.x = CANVAS_WIDTH + self.lower_pillar.width / 2 + self.extend_x
+        else:
+            self.upper_pillar.x = CANVAS_WIDTH + self.upper_pillar.width / 2
+            self.lower_pillar.x = CANVAS_WIDTH + self.lower_pillar.width / 2
         # random space between pillars
         self.rand_point()
         self.upper_pillar.y = self.rp - self.space / 2 - self.upper_pillar.height / 2
@@ -93,7 +97,8 @@ class FlappyDot(GameApp):
 
         # separate dot and pillar from elements (it's easier for collision checking :D)
         self.pillars = []
-        self.pillars.append(PillarPair(self, show_hitbox=True))
+        for i in range(4):
+            self.pillars.append(PillarPair(self, show_hitbox=True, extend_x=i*220))
 
         self.elements = [p for p in self.pillars]
         self.elements.append(self.dot)
