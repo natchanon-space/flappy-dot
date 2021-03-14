@@ -93,12 +93,12 @@ class PillarPair:
 class FlappyDot(GameApp):
     def create_sprites(self):
         # create dot
-        self.dot = Dot(self, 'images/dot.png', CANVAS_WIDTH // 6, CANVAS_HEIGHT // 2, show_hitbox=True)
+        self.dot = Dot(self, 'images/dot.png', CANVAS_WIDTH // 6, CANVAS_HEIGHT // 2, show_hitbox=False)
 
         # separate dot and pillar from elements (it's easier for collision checking :D)
         self.pillars = []
         for i in range(4):
-            self.pillars.append(PillarPair(self, show_hitbox=True, extend_x=i*220))
+            self.pillars.append(PillarPair(self, show_hitbox=False, extend_x=i*220))
 
         self.elements = [p for p in self.pillars]
         self.elements.append(self.dot)
