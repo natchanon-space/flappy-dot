@@ -1,9 +1,6 @@
 import tkinter as tk
 import random
 from gamelib import *
-from tkinter import messagebox
-import os
-
 
 CANVAS_WIDTH = 800
 CANVAS_HEIGHT = 500
@@ -14,7 +11,6 @@ GRAVITY = 2
 PILLAR_SPEED = 5
 STARTING_VELOCITY = -20
 JUMP_VELOCITY = 30
-
 
 class Dot(Sprite):
     def init_element(self):
@@ -39,7 +35,6 @@ class Dot(Sprite):
 
     def get_coords(self):
         return (self.x, self.y)
-
 
 class PillarPair():
     def __init__(self, game_app, space=200, show_hitbox=False, extend_x=0):
@@ -93,7 +88,6 @@ class PillarPair():
     def reset(self):
         self.is_started = False
 
-
 class FlappyDot(GameApp):
     def create_sprites(self):
         # create dot
@@ -137,27 +131,6 @@ class FlappyDot(GameApp):
             self.start_txt.hide()
             self.init_game(restart=True)
             self.start()
-
-    # def collision(self):
-    #     # pull pillar from the element
-    #     self.pillar_upper_ele = self.elements[1].upper_pillar
-    #     self.pillar_lower_ele = self.elements[1].lower_pillar
-    #     if self.dot.get_coords()[1] < - 300:
-    #         messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
-    #         root.destroy()
-    #     elif self.dot.get_coords()[1] > CANVAS_HEIGHT + 50:
-    #         messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
-    #         root.destroy()
-    #     elif self.dot.hitbox.get_hitbox()[0] >= self.pillar_upper_ele.hitbox.get_hitbox()[0] - 10\
-    #             and self.dot.hitbox.get_hitbox()[3] <= self.pillar_upper_ele.hitbox.get_hitbox()[3]:
-    #         # upper pillar collision
-    #         messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
-    #         root.destroy()
-    #     elif self.dot.hitbox.get_hitbox()[0] >= self.pillar_lower_ele.hitbox.get_hitbox()[0] - 10\
-    #             and self.dot.hitbox.get_hitbox()[1] >= self.pillar_lower_ele.hitbox.get_hitbox()[1]:
-    #         # lower pillar collision
-    #         messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score}")
-    #         root.destroy()
 
     # new version of collision
     def collision(self):
@@ -207,7 +180,6 @@ class FlappyDot(GameApp):
 
         self.after_id = self.after(self.update_delay, self.animate)
 
-
 def main():
     root = tk.Tk()
     root.title("Avocado Flight")
@@ -217,7 +189,6 @@ def main():
     app.start()
 
     root.mainloop()
-
 
 if __name__ == "__main__":
     main()
