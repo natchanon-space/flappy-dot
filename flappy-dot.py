@@ -119,6 +119,9 @@ class FlappyDot(GameApp):
             self.text = Text(self, text=f"Score: {self.score:.0f}", x=50, y=20, font=('Garamond', 20))
             self.start_txt = Text(self, text=f"Press Spacebar to Start", x=CANVAS_WIDTH/2, y=CANVAS_HEIGHT/2+70, font=('Garamond', 50))
 
+        self.canvas.tag_raise(self.text.object_id)
+        self.canvas.tag_raise(self.start_txt.object_id)
+
     def on_key_pressed(self, event):
         if event.char == ' ':
             if not self.dot.is_started:
@@ -190,11 +193,6 @@ class FlappyDot(GameApp):
             if dot_hitbox[0] >= upper_hitbox[2] or dot_hitbox[0] >= lower_hitbox[2]:
                 self.score += 0.04761904761
         self.text.set_text(f"Score: {self.score:.0f}")
-
-    def restart(self):
-        self.score = 0
-        self.parent.destroy()
-        main()
 
     def animate(self):
         for elem in self.elements:
