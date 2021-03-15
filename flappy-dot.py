@@ -137,6 +137,9 @@ class FlappyDot(GameApp):
             self.init_game(restart=True)
             self.start()
 
+        if event.char == "q":
+            self.parent.destroy()
+
     # new version of collision
     def collision(self):
         dot_hitbox = self.dot.hitbox.get_hitbox()  # x1, y1, x2, y2
