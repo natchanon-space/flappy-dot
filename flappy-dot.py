@@ -43,6 +43,9 @@ class PillarPair():
         self.extend_x = extend_x
         self.show_hitbox = show_hitbox
 
+        # passing check
+        self.is_passed = False
+
         # create pillars
         # change create lower pillar location
         self.upper_pillar = Sprite(game_app, "images/pillar-top.png", x=500, y=0, show_hitbox=show_hitbox)
@@ -68,8 +71,10 @@ class PillarPair():
         if self.is_started:
             self.upper_pillar.x -= PILLAR_SPEED
             self.lower_pillar.x -= PILLAR_SPEED
+            # reset passed status and coords
             if self.upper_pillar.x + self.upper_pillar.width / 2 <= 0:
                 self.reset_pillars()
+                self.is_passed = False
             # update hit box
             self.upper_pillar.hitbox_update()
             self.lower_pillar.hitbox_update()
@@ -163,8 +168,9 @@ class FlappyDot(GameApp):
         for pillars in self.pillars:
             upper_hitbox = pillars.upper_pillar.hitbox.get_hitbox()
             lower_hitbox = pillars.lower_pillar.hitbox.get_hitbox()
-            if dot_hitbox[0] >= upper_hitbox[2] or dot_hitbox[0] >= lower_hitbox[2]:
-                self.score += 0.04761904761
+            if dot_hitbox[2] >= upper_hitbox[2] and not pillars.is_passed:
+                self.score += 1
+                pillars.is_passed = True
         self.text.set_text(f"Score: {self.score:.0f}")
 
     def animate(self):
