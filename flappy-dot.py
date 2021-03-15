@@ -71,6 +71,7 @@ class PillarPair():
         if self.is_started:
             self.upper_pillar.x -= PILLAR_SPEED
             self.lower_pillar.x -= PILLAR_SPEED
+            # reset passed status and coords
             if self.upper_pillar.x + self.upper_pillar.width / 2 <= 0:
                 self.reset_pillars()
                 self.is_passed = False
