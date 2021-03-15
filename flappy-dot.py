@@ -41,8 +41,8 @@ class Dot(Sprite):
         return (self.x, self.y)
 
 
-class PillarPair:
-    def __init__(self, game_app, space=150, show_hitbox=False, extend_x=0):
+class PillarPair():
+    def __init__(self, game_app, space=200, show_hitbox=False, extend_x=0):
         self.is_started = False
         self.space = space
         self.extend_x = extend_x
@@ -102,31 +102,38 @@ class FlappyDot(GameApp):
         # separate dot and pillar from elements (it's easier for collision checking :D)
         self.pillars = []
         for i in range(4):
-            self.pillars.append(PillarPair(self, show_hitbox=False, extend_x=i * 220))
+            self.pillars.append(PillarPair(self, show_hitbox=False, extend_x=i*220))
 
         self.elements = [p for p in self.pillars]
         self.elements.append(self.dot) 
 
-    def init_game(self):
-        self.score = 0  
+    def init_game(self, restart=False):
+        # restart setup
+        self.elements = []
+        self.score = 0
 
         self.canvas.config(background="lightgreen")
         self.create_sprites()
 
-        self.text = Text(self, text=f"Score: {self.score:.0f}", x=50, y=20)
-        self.start_txt = Text(self, text=f"Press Spacebar to Start", x=CANVAS_WIDTH/2, y=CANVAS_HEIGHT - 75, font=('Garamond', 50))
-
-        self.elements.append(self.text)
+        if not restart:
+            self.text = Text(self, text=f"Score: {self.score:.0f}", x=50, y=20, font=('Garamond', 20))
+            self.start_txt = Text(self, text=f"Press Spacebar to Start", x=CANVAS_WIDTH/2, y=CANVAS_HEIGHT/2+70, font=('Garamond', 50))
 
     def on_key_pressed(self, event):
         if event.char == ' ':
             if not self.dot.is_started:
+                self.start_txt.hide()
                 self.dot.start()
                 for p in self.pillars:
                     p.start()
             else:
                 self.dot.jump()
-        self.start_txt.set_text(" ")
+        
+        if event.char == "s" and self.collision():
+            self.text.set_text(text=f"Score: {self.score:.0f}")
+            self.start_txt.hide()
+            self.init_game(restart=True)
+            self.start()
 
     # def collision(self):
     #     # pull pillar from the element
@@ -151,19 +158,15 @@ class FlappyDot(GameApp):
 
     # new version of collision
     def collision(self):
-        def send_message():
-            messagebox.showinfo(title="Flappy Birds", message=f"You lose! Score: {self.score:.0f}"                                                              + "\n" + f"Retry?" + "\n" + "Space bar to retry")
-            self.restart()
-
         dot_hitbox = self.dot.hitbox.get_hitbox()  # x1, y1, x2, y2
 
         # upper floor collide
         if dot_hitbox[1] < -300:
-            send_message()
+            return True
 
         # lower floor collide
         if dot_hitbox[3] > CANVAS_HEIGHT + 10:
-            send_message()
+            return True
         # all pillars collide
         for pillars in self.pillars:
             upper_hitbox = pillars.upper_pillar.hitbox.get_hitbox()
@@ -171,11 +174,13 @@ class FlappyDot(GameApp):
             # upper pillar
             if upper_hitbox[0] <= dot_hitbox[2] <= upper_hitbox[2] and upper_hitbox[1] <= dot_hitbox[1] <= upper_hitbox[
                 3]:
-                send_message()
+                return True
             # lower pillar
             if lower_hitbox[0] <= dot_hitbox[2] <= lower_hitbox[2] and lower_hitbox[1] <= dot_hitbox[3] <= lower_hitbox[
                 3]:
-                send_message()
+                return True
+        # base case
+        return False
 
     def check_score(self):
         dot_hitbox = self.dot.hitbox.get_hitbox()
@@ -195,9 +200,12 @@ class FlappyDot(GameApp):
         for elem in self.elements:
             elem.update()
             elem.render()
-
-        self.collision()
         self.check_score()
+
+        if self.collision():
+            self.start_txt.set_text(text=f"{'You lose!':^22}\n{f'Score: {self.score:.0f}':^22}\n(Press 'S' to Restart)")
+            self.start_txt.show()
+            return
 
         self.after_id = self.after(self.update_delay, self.animate)
 
